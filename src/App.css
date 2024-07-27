@@ -23,6 +23,12 @@ body {
   width: 100%;
   max-width: 600px;
   text-align: center;
+  transition: all 0.3s ease;
+}
+
+.quiz-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
 }
 
 h1, h2, h3 {
@@ -74,12 +80,17 @@ h1, h2, h3 {
   margin: 4px 2px;
   cursor: pointer;
   border-radius: 5px;
-  transition: background-color 0.3s, transform 0.1s;
+  transition: all 0.3s ease;
 }
 
 .option-btn:hover, .submit-btn:hover, .start-btn:hover, .restart-btn:hover {
   background-color: #2980b9;
   transform: translateY(-2px);
+}
+
+.option-btn:disabled, .submit-btn:disabled {
+  background-color: #bdc3c7;
+  cursor: not-allowed;
 }
 
 .option-btn.selected {
@@ -99,6 +110,12 @@ h1, h2, h3 {
   border: 1px solid #bdc3c7;
   border-radius: 5px;
   font-size: 16px;
+  transition: border-color 0.3s ease;
+}
+
+.short-answer-input:focus {
+  border-color: #3498db;
+  outline: none;
 }
 
 .score, .time {
@@ -121,6 +138,12 @@ h1, h2, h3 {
   border-radius: 5px;
   padding: 15px;
   margin-bottom: 20px;
+  transition: all 0.3s ease;
+}
+
+.review-question:hover {
+  transform: translateX(5px);
+  box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.1);
 }
 
 .review-question h3 {
@@ -139,9 +162,85 @@ h1, h2, h3 {
 .incorrect {
   color: #e74c3c;
 }
+.explanation {
+  margin-top: 20px;
+  padding: 15px;
+  border-radius: 5px;
+  font-weight: 500;
+  animation: fadeIn 0.5s ease-in;
+}
+
+.explanation.correct {
+  background-color: rgba(46, 204, 113, 0.2);
+  border: 1px solid #2ecc71;
+}
+
+.explanation.incorrect {
+  background-color: rgba(231, 76, 60, 0.2);
+  border: 1px solid #e74c3c;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
 
 @media (max-width: 600px) {
   .answer-options {
     grid-template-columns: 1fr;
   }
+}
+
+/* Add some animations */
+@keyframes slideIn {
+  from {
+    transform: translateY(-20px);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+.quiz-card {
+  animation: slideIn 0.5s ease-out;
+}
+
+.start-btn, .restart-btn {
+  animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+  0% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.05);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+
+/* Improve accessibility */
+.option-btn:focus, .submit-btn:focus, .start-btn:focus, .restart-btn:focus {
+  outline: 2px solid #3498db;
+  outline-offset: 2px;
+}
+
+/* Add a progress bar */
+.progress-bar {
+  width: 100%;
+  height: 10px;
+  background-color: #ecf0f1;
+  border-radius: 5px;
+  margin-bottom: 20px;
+  overflow: hidden;
+}
+
+.progress {
+  height: 100%;
+  background-color: #3498db;
+  transition: width 0.3s ease;
 }

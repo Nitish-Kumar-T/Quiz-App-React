@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import './App.css';
+import confetti from 'canvas-confetti';
 
-const questions = [
+const allQuestions = [
   {
     id: 1,
     type: "multiple-choice",
@@ -40,10 +41,43 @@ const questions = [
     options: ["2", "4", "7", "9", "11"],
     correctAnswer: ["2", "7", "11"],
     explanation: "Prime numbers are numbers that have exactly two factors: 1 and themselves."
+  },
+  {
+    id: 6,
+    type: "multiple-choice",
+    question: "Which element has the chemical symbol 'Au'?",
+    options: ["Silver", "Gold", "Copper", "Aluminum"],
+    correctAnswer: "Gold",
+    explanation: "The chemical symbol 'Au' comes from the Latin word for gold, 'aurum'."
+  },
+  {
+    id: 7,
+    type: "true-false",
+    question: "The Great Wall of China is visible from space.",
+    options: ["True", "False"],
+    correctAnswer: "False",
+    explanation: "Contrary to popular belief, the Great Wall of China is not visible from space with the naked eye."
+  },
+  {
+    id: 8,
+    type: "multiple-select",
+    question: "Which of these countries are in South America?",
+    options: ["Brazil", "Spain", "Peru", "Egypt", "Argentina"],
+    correctAnswer: ["Brazil", "Peru", "Argentina"],
+    explanation: "Brazil, Peru, and Argentina are all countries located in South America."
   }
 ];
 
+function shuffleArray(array) {
+  for (let i = array.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [array[i], array[j]] = [array[j], array[i]];
+  }
+  return array;
+}
+
 function App() {
+  const [questions, setQuestions] = useState([]);
   const [currentQuestion, setCurrentQuestion] = useState(0);
   const [score, setScore] = useState(0);
   const [showScore, setShowScore] = useState(false);
@@ -51,6 +85,7 @@ function App() {
   const [timeLeft, setTimeLeft] = useState(120);
   const [quizState, setQuizState] = useState('not-started');
   const [selectedOptions, setSelectedOptions] = useState([]);
+  const [showExplanation, setShowExplanation] = useState(false);
 
   useEffect(() => {
     if (quizState === 'in-progress' && timeLeft > 0) {
@@ -62,6 +97,7 @@ function App() {
   }, [timeLeft, quizState]);
 
   const startQuiz = () => {
+    setQuestions(shuffleArray(allQuestions).slice(0, 5));
     setQuizState('in-progress');
     setTimeLeft(120);
   };
@@ -86,21 +122,34 @@ function App() {
       setScore(score + 1);
     }
 
-    const nextQuestion = currentQuestion + 1;
-    if (nextQuestion < questions.length) {
-      setCurrentQuestion(nextQuestion);
-      setSelectedOptions([]);
-    } else {
-      finishQuiz();
-    }
+    setShowExplanation(true);
+
+    setTimeout(() => {
+      setShowExplanation(false);
+      const nextQuestion = currentQuestion + 1;
+      if (nextQuestion < questions.length) {
+        setCurrentQuestion(nextQuestion);
+        setSelectedOptions([]);
+      } else {
+        finishQuiz();
+      }
+    }, 3000);
   };
 
   const finishQuiz = () => {
     setShowScore(true);
     setQuizState('finished');
+    if (score / questions.length >= 0.7) {
+      confetti({
+        particleCount: 100,
+        spread: 70,
+        origin: { y: 0.6 }
+      });
+    }
   };
 
   const restartQuiz = () => {
+    setQuestions(shuffleArray(allQuestions).slice(0, 5));
     setCurrentQuestion(0);
     setScore(0);
     setShowScore(false);
@@ -108,6 +157,7 @@ function App() {
     setTimeLeft(120);
     setQuizState('not-started');
     setSelectedOptions([]);
+    setShowExplanation(false);
   };
 
   const handleOptionSelect = (option) => {
@@ -126,7 +176,7 @@ function App() {
         return (
           <div className="answer-options">
             {question.options.map((option, index) => (
-              <button key={index} onClick={() => handleAnswerSubmit(option)} className="option-btn">
+              <button key={index} onClick={() => handleAnswerSubmit(option)} className="option-btn" disabled={showExplanation}>
                 {option}
               </button>
             ))}
@@ -138,8 +188,8 @@ function App() {
             e.preventDefault();
             handleAnswerSubmit(e.target.answer.value);
           }} className="short-answer-form">
-            <input type="text" name="answer" required className="short-answer-input" />
-            <button type="submit" className="submit-btn">Submit</button>
+            <input type="text" name="answer" required className="short-answer-input" disabled={showExplanation} />
+            <button type="submit" className="submit-btn" disabled={showExplanation}>Submit</button>
           </form>
         );
       case 'multiple-select':
@@ -150,11 +200,12 @@ function App() {
                 key={index} 
                 onClick={() => handleOptionSelect(option)}
                 className={`option-btn ${selectedOptions.includes(option) ? 'selected' : ''}`}
+                disabled={showExplanation}
               >
                 {option}
               </button>
             ))}
-            <button onClick={() => handleAnswerSubmit(selectedOptions)} className="submit-btn">Submit</button>
+            <button onClick={() => handleAnswerSubmit(selectedOptions)} className="submit-btn" disabled={showExplanation}>Submit</button>
           </div>
         );
       default:
@@ -215,6 +266,11 @@ function App() {
           </div>
           <p className="question">{questions[currentQuestion].question}</p>
           {renderQuestion()}
+          {showExplanation && (
+            <div className={`explanation ${answers[questions[currentQuestion].id]?.isCorrect ? 'correct' : 'incorrect'}`}>
+              <p>{questions[currentQuestion].explanation}</p>
+            </div>
+          )}
         </div>
       )}
     </div>
