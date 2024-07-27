@@ -1,15 +1,17 @@
 import React, { useState, useEffect } from 'react';
 import './App.css';
-import confetti from 'canvas-confetti';
+// import confetti from 'canvas-confetti';
 
 const allQuestions = [
+  // Easy questions
   {
     id: 1,
     type: "multiple-choice",
     question: "What is the capital of France?",
     options: ["London", "Berlin", "Paris", "Madrid"],
     correctAnswer: "Paris",
-    explanation: "Paris is the capital and most populous city of France."
+    explanation: "Paris is the capital and most populous city of France.",
+    difficulty: "easy"
   },
   {
     id: 2,
@@ -17,55 +19,46 @@ const allQuestions = [
     question: "The Earth is flat.",
     options: ["True", "False"],
     correctAnswer: "False",
-    explanation: "The Earth is actually an oblate spheroid, slightly flattened at the poles."
+    explanation: "The Earth is actually an oblate spheroid, slightly flattened at the poles.",
+    difficulty: "easy"
   },
+  // Medium questions
   {
     id: 3,
     type: "multiple-choice",
     question: "Which planet is known as the Red Planet?",
     options: ["Mars", "Jupiter", "Venus", "Saturn"],
     correctAnswer: "Mars",
-    explanation: "Mars is often called the Red Planet due to its reddish appearance in the night sky."
+    explanation: "Mars is often called the Red Planet due to its reddish appearance in the night sky.",
+    difficulty: "medium"
   },
   {
     id: 4,
     type: "short-answer",
     question: "What is the chemical symbol for water?",
     correctAnswer: "H2O",
-    explanation: "H2O represents two hydrogen atoms and one oxygen atom bonded together."
+    explanation: "H2O represents two hydrogen atoms and one oxygen atom bonded together.",
+    difficulty: "medium"
   },
+  // Hard questions
   {
     id: 5,
     type: "multiple-select",
     question: "Which of the following are prime numbers?",
     options: ["2", "4", "7", "9", "11"],
     correctAnswer: ["2", "7", "11"],
-    explanation: "Prime numbers are numbers that have exactly two factors: 1 and themselves."
+    explanation: "Prime numbers are numbers that have exactly two factors: 1 and themselves.",
+    difficulty: "hard"
   },
   {
     id: 6,
     type: "multiple-choice",
-    question: "Which element has the chemical symbol 'Au'?",
-    options: ["Silver", "Gold", "Copper", "Aluminum"],
-    correctAnswer: "Gold",
-    explanation: "The chemical symbol 'Au' comes from the Latin word for gold, 'aurum'."
+    question: "What is the half-life of Carbon-14?",
+    options: ["2,730 years", "5,730 years", "7,730 years", "10,730 years"],
+    correctAnswer: "5,730 years",
+    explanation: "The half-life of Carbon-14 is approximately 5,730 years, which makes it useful for dating objects up to about 50,000 years old.",
+    difficulty: "hard"
   },
-  {
-    id: 7,
-    type: "true-false",
-    question: "The Great Wall of China is visible from space.",
-    options: ["True", "False"],
-    correctAnswer: "False",
-    explanation: "Contrary to popular belief, the Great Wall of China is not visible from space with the naked eye."
-  },
-  {
-    id: 8,
-    type: "multiple-select",
-    question: "Which of these countries are in South America?",
-    options: ["Brazil", "Spain", "Peru", "Egypt", "Argentina"],
-    correctAnswer: ["Brazil", "Peru", "Argentina"],
-    explanation: "Brazil, Peru, and Argentina are all countries located in South America."
-  }
 ];
 
 function shuffleArray(array) {
@@ -86,6 +79,9 @@ function App() {
   const [quizState, setQuizState] = useState('not-started');
   const [selectedOptions, setSelectedOptions] = useState([]);
   const [showExplanation, setShowExplanation] = useState(false);
+  const [difficulty, setDifficulty] = useState('');
+  const [username, setUsername] = useState('');
+  const [leaderboard, setLeaderboard] = useState([]);
 
   useEffect(() => {
     if (quizState === 'in-progress' && timeLeft > 0) {
@@ -97,9 +93,10 @@ function App() {
   }, [timeLeft, quizState]);
 
   const startQuiz = () => {
-    setQuestions(shuffleArray(allQuestions).slice(0, 5));
+    const filteredQuestions = allQuestions.filter(q => q.difficulty === difficulty);
+    setQuestions(shuffleArray(filteredQuestions).slice(0, 5));
     setQuizState('in-progress');
-    setTimeLeft(120);
+    setTimeLeft(difficulty === 'easy' ? 120 : difficulty === 'medium' ? 180 : 240);
   };
 
   const handleAnswerSubmit = (selectedAnswer) => {
@@ -119,7 +116,7 @@ function App() {
     });
 
     if (isCorrect) {
-      setScore(score + 1);
+      setScore(score + (difficulty === 'easy' ? 1 : difficulty === 'medium' ? 2 : 3));
     }
 
     setShowExplanation(true);
@@ -139,25 +136,36 @@ function App() {
   const finishQuiz = () => {
     setShowScore(true);
     setQuizState('finished');
-    if (score / questions.length >= 0.7) {
+    if (score / (questions.length * (difficulty === 'easy' ? 1 : difficulty === 'medium' ? 2 : 3)) >= 0.7) {
       confetti({
         particleCount: 100,
         spread: 70,
         origin: { y: 0.6 }
       });
     }
+    updateLeaderboard();
+  };
+
+  const updateLeaderboard = () => {
+    const newLeaderboard = [...leaderboard, { username, score, difficulty }]
+      .sort((a, b) => b.score - a.score)
+      .slice(0, 10);
+    setLeaderboard(newLeaderboard);
+    localStorage.setItem('quizLeaderboard', JSON.stringify(newLeaderboard));
   };
 
   const restartQuiz = () => {
-    setQuestions(shuffleArray(allQuestions).slice(0, 5));
+    setQuestions([]);
     setCurrentQuestion(0);
     setScore(0);
     setShowScore(false);
     setAnswers({});
-    setTimeLeft(120);
+    setTimeLeft(0);
     setQuizState('not-started');
     setSelectedOptions([]);
     setShowExplanation(false);
+    setDifficulty('');
+    setUsername('');
   };
 
   const handleOptionSelect = (option) => {
@@ -236,13 +244,54 @@ function App() {
     );
   };
 
+  const renderLeaderboard = () => {
+    return (
+      <div className="leaderboard">
+        <h2>Leaderboard</h2>
+        <table>
+          <thead>
+            <tr>
+              <th>Rank</th>
+              <th>Username</th>
+              <th>Score</th>
+              <th>Difficulty</th>
+            </tr>
+          </thead>
+          <tbody>
+            {leaderboard.map((entry, index) => (
+              <tr key={index}>
+                <td>{index + 1}</td>
+                <td>{entry.username}</td>
+                <td>{entry.score}</td>
+                <td>{entry.difficulty}</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+    );
+  };
+
   if (quizState === 'not-started') {
     return (
       <div className="App">
         <div className="quiz-card start-screen">
           <h1>Welcome to the Quiz!</h1>
-          <p>Test your knowledge with our 5-question quiz. You have 2 minutes to complete all questions. Good luck!</p>
-          <button onClick={startQuiz} className="start-btn">Start Quiz</button>
+          <p>Test your knowledge with our 5-question quiz. Select a difficulty level to begin.</p>
+          <input 
+            type="text" 
+            placeholder="Enter your username" 
+            value={username} 
+            onChange={(e) => setUsername(e.target.value)}
+            className="username-input"
+          />
+          <div className="difficulty-selection">
+            <button onClick={() => setDifficulty('easy')} className={`difficulty-btn ${difficulty === 'easy' ? 'selected' : ''}`}>Easy</button>
+            <button onClick={() => setDifficulty('medium')} className={`difficulty-btn ${difficulty === 'medium' ? 'selected' : ''}`}>Medium</button>
+            <button onClick={() => setDifficulty('hard')} className={`difficulty-btn ${difficulty === 'hard' ? 'selected' : ''}`}>Hard</button>
+          </div>
+          <button onClick={startQuiz} className="start-btn" disabled={!difficulty || !username}>Start Quiz</button>
+          {renderLeaderboard()}
         </div>
       </div>
     );
@@ -253,9 +302,10 @@ function App() {
       {showScore ? (
         <div className="quiz-card score-section">
           <h2>Quiz Completed!</h2>
-          <p className="score">You scored {score} out of {questions.length}</p>
-          <p className="time">Time taken: {120 - timeLeft} seconds</p>
+          <p className="score">You scored {score} out of {questions.length * (difficulty === 'easy' ? 1 : difficulty === 'medium' ? 2 : 3)}</p>
+          <p className="time">Time taken: {(difficulty === 'easy' ? 120 : difficulty === 'medium' ? 180 : 240) - timeLeft} seconds</p>
           {renderReview()}
+          {renderLeaderboard()}
           <button onClick={restartQuiz} className="restart-btn">Restart Quiz</button>
         </div>
       ) : (
@@ -263,6 +313,9 @@ function App() {
           <div className="quiz-header">
             <h2>Question {currentQuestion + 1}/{questions.length}</h2>
             <p className="timer">Time left: {timeLeft} seconds</p>
+          </div>
+          <div className="progress-bar">
+            <div className="progress" style={{ width: `${(currentQuestion / questions.length) * 100}%` }}></div>
           </div>
           <p className="question">{questions[currentQuestion].question}</p>
           {renderQuestion()}
