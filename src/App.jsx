@@ -126,7 +126,7 @@ function App() {
         return (
           <div className="answer-options">
             {question.options.map((option, index) => (
-              <button key={index} onClick={() => handleAnswerSubmit(option)}>
+              <button key={index} onClick={() => handleAnswerSubmit(option)} className="option-btn">
                 {option}
               </button>
             ))}
@@ -137,9 +137,9 @@ function App() {
           <form onSubmit={(e) => {
             e.preventDefault();
             handleAnswerSubmit(e.target.answer.value);
-          }}>
-            <input type="text" name="answer" required />
-            <button type="submit">Submit</button>
+          }} className="short-answer-form">
+            <input type="text" name="answer" required className="short-answer-input" />
+            <button type="submit" className="submit-btn">Submit</button>
           </form>
         );
       case 'multiple-select':
@@ -149,12 +149,12 @@ function App() {
               <button 
                 key={index} 
                 onClick={() => handleOptionSelect(option)}
-                className={selectedOptions.includes(option) ? 'selected' : ''}
+                className={`option-btn ${selectedOptions.includes(option) ? 'selected' : ''}`}
               >
                 {option}
               </button>
             ))}
-            <button onClick={() => handleAnswerSubmit(selectedOptions)}>Submit</button>
+            <button onClick={() => handleAnswerSubmit(selectedOptions)} className="submit-btn">Submit</button>
           </div>
         );
       default:
@@ -168,14 +168,16 @@ function App() {
         <h2>Review Your Answers</h2>
         {questions.map((question, index) => (
           <div key={question.id} className="review-question">
-            <p>Q{index + 1}: {question.question}</p>
-            <p>Your answer: {Array.isArray(answers[question.id]?.selectedAnswer) 
+            <h3>Q{index + 1}: {question.question}</h3>
+            <p><strong>Your answer:</strong> {Array.isArray(answers[question.id]?.selectedAnswer) 
               ? answers[question.id]?.selectedAnswer.join(', ') 
               : answers[question.id]?.selectedAnswer || 'Not answered'}</p>
-            <p>Correct answer: {Array.isArray(question.correctAnswer) 
+            <p><strong>Correct answer:</strong> {Array.isArray(question.correctAnswer) 
               ? question.correctAnswer.join(', ') 
               : question.correctAnswer}</p>
-            <p>{answers[question.id]?.isCorrect ? '✅ Correct' : '❌ Incorrect'}</p>
+            <p className={answers[question.id]?.isCorrect ? 'correct' : 'incorrect'}>
+              {answers[question.id]?.isCorrect ? '✅ Correct' : '❌ Incorrect'}
+            </p>
             <p><strong>Explanation:</strong> {question.explanation}</p>
           </div>
         ))}
@@ -186,9 +188,11 @@ function App() {
   if (quizState === 'not-started') {
     return (
       <div className="App">
-        <h1>Welcome to the Quiz!</h1>
-        <p>You have 2 minutes to complete the quiz. Good luck!</p>
-        <button onClick={startQuiz}>Start Quiz</button>
+        <div className="quiz-card start-screen">
+          <h1>Welcome to the Quiz!</h1>
+          <p>Test your knowledge with our 5-question quiz. You have 2 minutes to complete all questions. Good luck!</p>
+          <button onClick={startQuiz} className="start-btn">Start Quiz</button>
+        </div>
       </div>
     );
   }
@@ -196,19 +200,20 @@ function App() {
   return (
     <div className="App">
       {showScore ? (
-        <div className="score-section">
-          <h2>You scored {score} out of {questions.length}</h2>
-          <p>Time taken: {120 - timeLeft} seconds</p>
+        <div className="quiz-card score-section">
+          <h2>Quiz Completed!</h2>
+          <p className="score">You scored {score} out of {questions.length}</p>
+          <p className="time">Time taken: {120 - timeLeft} seconds</p>
           {renderReview()}
-          <button onClick={restartQuiz}>Restart Quiz</button>
+          <button onClick={restartQuiz} className="restart-btn">Restart Quiz</button>
         </div>
       ) : (
-        <div className="question-section">
+        <div className="quiz-card question-section">
           <div className="quiz-header">
             <h2>Question {currentQuestion + 1}/{questions.length}</h2>
-            <p>Time left: {timeLeft} seconds</p>
+            <p className="timer">Time left: {timeLeft} seconds</p>
           </div>
-          <p>{questions[currentQuestion].question}</p>
+          <p className="question">{questions[currentQuestion].question}</p>
           {renderQuestion()}
         </div>
       )}
