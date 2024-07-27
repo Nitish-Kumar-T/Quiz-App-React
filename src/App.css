@@ -1,6 +1,6 @@
 .App {
   text-align: center;
-  max-width: 500px;
+  max-width: 600px;
   margin: 0 auto;
   padding: 20px;
 }
@@ -12,19 +12,10 @@
   box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
 }
 
-.question-count {
-  margin-bottom: 20px;
-}
-
-.timer {
-  font-size: 18px;
-  font-weight: bold;
-  color: #d9534f;
-  margin-bottom: 20px;
-}
-
-.question-text {
-  font-size: 20px;
+.quiz-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
   margin-bottom: 20px;
 }
 
@@ -32,6 +23,7 @@
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: 10px;
+  margin-top: 20px;
 }
 
 button {
@@ -51,4 +43,23 @@ button {
 
 button:hover {
   background-color: #45a049;
+}
+
+input[type="text"] {
+  width: 100%;
+  padding: 10px;
+  margin: 10px 0;
+  box-sizing: border-box;
+}
+
+.review-section {
+  margin-top: 20px;
+  text-align: left;
+}
+
+.review-question {
+  background-color: #fff;
+  padding: 10px;
+  margin-bottom: 10px;
+  border-radius: 5px;
 }
