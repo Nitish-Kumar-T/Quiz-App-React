@@ -4,28 +4,24 @@
   margin: 0 auto;
   padding: 20px;
 }
-
 .question-section, .score-section {
   background-color: #f0f0f0;
   padding: 20px;
   border-radius: 10px;
   box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
 }
-
 .quiz-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
   margin-bottom: 20px;
 }
-
 .answer-options {
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: 10px;
   margin-top: 20px;
 }
-
 button {
   background-color: #4CAF50;
   border: none;
@@ -40,23 +36,23 @@ button {
   border-radius: 5px;
   transition: background-color 0.3s;
 }
-
 button:hover {
   background-color: #45a049;
 }
-
+button.selected {
+  background-color: #45a049;
+  border: 2px solid #2c6e2e;
+}
 input[type="text"] {
   width: 100%;
   padding: 10px;
   margin: 10px 0;
   box-sizing: border-box;
 }
-
 .review-section {
   margin-top: 20px;
   text-align: left;
 }
-
 .review-question {
   background-color: #fff;
   padding: 10px;
